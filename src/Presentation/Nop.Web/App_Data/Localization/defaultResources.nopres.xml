@@ -2040,6 +2040,12 @@
   <LocaleResource Name="Admin.Catalog.ProductReviews.Fields.ReviewText.Required">
     <Value>Review text is required.</Value>
   </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.ProductReviews.Fields.Store">
+    <Value>Store</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.ProductReviews.Fields.Store.Hint">
+    <Value>A store name in which this review was written.</Value>
+  </LocaleResource>
   <LocaleResource Name="Admin.Catalog.ProductReviews.Fields.Title">
     <Value>Title</Value>
   </LocaleResource>
@@ -2061,11 +2067,23 @@
   <LocaleResource Name="Admin.Catalog.ProductReviews.List.CreatedOnTo.Hint">
     <Value>The creation to date for the search.</Value>
   </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.ProductReviews.List.SearchStore">
+    <Value>Store</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.ProductReviews.List.SearchStore.Hint">
+    <Value>Search by a specific store.</Value>
+  </LocaleResource>
   <LocaleResource Name="Admin.Catalog.ProductReviews.List.SearchText">
     <Value>Message</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Catalog.ProductReviews.List.SearchText.Hint">
     <Value>Search in title and review text.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.ProductReviews.List.SearchProduct">
+    <Value>Product</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.ProductReviews.List.SearchProduct.Hint">
+    <Value>Search by a specific product.</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Catalog.ProductReviews.Updated">
     <Value>The product review has been updated successfully.</Value>
@@ -2803,7 +2821,7 @@
     <Value>The width of the product.</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Catalog.Products.Imported">
-    <Value>Product(s) have been imported successfully.</Value>
+    <Value>Products have been imported successfully.</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Catalog.Products.Info">
     <Value>Product Info</Value>
@@ -4036,7 +4054,7 @@
     <Value>Flag image file name</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Languages.Fields.FlagImageFileName.Hint">
-    <Value>The flag image file name. The image should be saved into \\images\\flags\\ directory.</Value>
+    <Value>The flag image file name. The image should be saved into \images\flags\ directory.</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Languages.Fields.LanguageCulture">
     <Value>Language culture</Value>
@@ -4824,11 +4842,29 @@
   <LocaleResource Name="Admin.Configuration.Settings.Catalog.ShowProductSku.Hint">
     <Value>Check to show product SKU in public store.</Value>
   </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.ShowProductReviewsPerStore">
+    <Value>Reviews per store</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.ShowProductReviewsPerStore.Hint">
+    <Value>Enable show reviews per store.</Value>
+  </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Settings.Catalog.ShowShareButton">
     <Value>Show a share button</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Settings.Catalog.ShowShareButton.Hint">
     <Value>Check to show share button on product details page.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.SortOptions">
+    <Value>Sort options</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.SortOptions.DisplayOrder">
+    <Value>Display order</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.SortOptions.IsActive">
+    <Value>Is active</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.SortOptions.Name">
+    <Value>Name</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Settings.CustomerUser">
     <Value>Customer settings</Value>
@@ -5675,6 +5711,12 @@
   </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.reCaptchaPublicKey.Hint">
     <Value>Enter reCAPTCHA public key (if enabled)</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.reCaptchaVersion">
+    <Value>reCAPTCHA version</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.reCaptchaVersion.Hint">
+    <Value>Select version of the reCAPTCHA.</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.SecuritySettings">
     <Value>Security settings</Value>
@@ -10650,6 +10692,12 @@
   <LocaleResource Name="Admin.System.QueuedEmails.Fields.CreatedOn.Hint">
     <Value>Date/Time message added to queue.</Value>
   </LocaleResource>
+  <LocaleResource Name="Admin.System.QueuedEmails.Fields.DontSendBeforeDate">
+    <Value>Planned date of sending</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.System.QueuedEmails.Fields.DontSendBeforeDate.Hint">
+    <Value>The specific send date and time.</Value>
+  </LocaleResource>
   <LocaleResource Name="Admin.System.QueuedEmails.Fields.EmailAccountName">
     <Value>Email account</Value>
   </LocaleResource>
@@ -10694,6 +10742,12 @@
   </LocaleResource>
   <LocaleResource Name="Admin.System.QueuedEmails.Fields.ReplyToName.Hint">
     <Value>ReplyTo name (optional).</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.System.QueuedEmails.Fields.SendImmediately">
+    <Value>Send immediately</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.System.QueuedEmails.Fields.SendImmediately.Hint">
+    <Value>Send message immediately.</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.System.QueuedEmails.Fields.SentOn">
     <Value>Sent on</Value>
@@ -11631,6 +11685,9 @@
   <LocaleResource Name="Common.WrongCaptcha">
     <Value>The characters didn't match the picture. Please try again.</Value>
   </LocaleResource>
+  <LocaleResource Name="Common.WrongCaptchaV2">
+    <Value>The reCAPTCHA response is invalid or malformed. Please try again.</Value>
+  </LocaleResource>
   <LocaleResource Name="Common.WrongEmail">
     <Value>Wrong email</Value>
   </LocaleResource>
@@ -12158,6 +12215,12 @@
   </LocaleResource>
   <LocaleResource Name="Enums.Nop.Services.Payments.RecurringPaymentType.NotSupported">
     <Value>Not supported</Value>
+  </LocaleResource>
+  <LocaleResource Name="Enums.Nop.Web.Framework.Security.Captcha.ReCaptchaVersion.Version1">
+    <Value>Version 1.0</Value>
+  </LocaleResource>
+  <LocaleResource Name="Enums.Nop.Web.Framework.Security.Captcha.ReCaptchaVersion.Version2">
+    <Value>Version 2.0</Value>
   </LocaleResource>
   <LocaleResource Name="EUCookieLaw.CannotBrowse">
     <Value>You cannot browse this site until you accept cookies</Value>

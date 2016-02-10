@@ -1074,6 +1074,7 @@ namespace Nop.Admin.Controllers
                 model.DisplayTaxShippingInfoShoppingCart_OverrideForStore = _settingService.SettingExists(catalogSettings, x => x.DisplayTaxShippingInfoShoppingCart, storeScope);
                 model.DisplayTaxShippingInfoWishlist_OverrideForStore = _settingService.SettingExists(catalogSettings, x => x.DisplayTaxShippingInfoWishlist, storeScope);
                 model.DisplayTaxShippingInfoOrderDetailsPage_OverrideForStore = _settingService.SettingExists(catalogSettings, x => x.DisplayTaxShippingInfoOrderDetailsPage, storeScope);
+                model.ShowProductReviewsPerStore_OverrideForStore = _settingService.SettingExists(catalogSettings, x => x.ShowProductReviewsPerStore, storeScope);
             }
             return View(model);
         }
@@ -1357,6 +1358,11 @@ namespace Nop.Admin.Controllers
             else if (storeScope > 0)
                 _settingService.DeleteSetting(catalogSettings, x => x.DisplayTaxShippingInfoOrderDetailsPage, storeScope);
 
+            if (model.ShowProductReviewsPerStore_OverrideForStore || storeScope == 0)
+                _settingService.SaveSetting(catalogSettings, x => x.ShowProductReviewsPerStore, storeScope, false);
+            else if (storeScope > 0)
+                _settingService.DeleteSetting(catalogSettings, x => x.ShowProductReviewsPerStore, storeScope);
+
             //now clear settings cache
             _settingService.ClearCache();
 
@@ -1371,7 +1377,59 @@ namespace Nop.Admin.Controllers
             return RedirectToAction("Catalog");
         }
 
+        #region Sort options
 
+        [HttpPost]
+        public ActionResult SortOptionsList(DataSourceRequest command)
+        {
+            if (!_permissionService.Authorize(StandardPermissionProvider.ManageSettings))
+                return AccessDeniedView();
+
+            var storeScope = this.GetActiveStoreScopeConfiguration(_storeService, _workContext);
+            var catalogSettings = _settingService.LoadSetting<CatalogSettings>(storeScope);
+            var model = new List<SortOptionModel>();
+            foreach (int option in Enum.GetValues(typeof(ProductSortingEnum)))
+            {
+                int value;
+                model.Add(new SortOptionModel()
+                {
+                    Id = option,
+                    Name = ((ProductSortingEnum)option).GetLocalizedEnum(_localizationService, _workContext),
+                    IsActive = !catalogSettings.ProductSortingEnumDisabled.Contains(option),
+                    DisplayOrder = catalogSettings.ProductSortingEnumDisplayOrder.TryGetValue(option, out value) ? value : option
+                });
+            }
+            var gridModel = new DataSourceResult
+            {
+                Data = model.OrderBy(option => option.DisplayOrder),
+                Total = model.Count
+            };
+            return Json(gridModel);
+        }
+
+        [HttpPost]
+        public ActionResult SortOptionUpdate(SortOptionModel model)
+        {
+            if (!_permissionService.Authorize(StandardPermissionProvider.ManageSettings))
+                return AccessDeniedView();
+
+            var storeScope = this.GetActiveStoreScopeConfiguration(_storeService, _workContext);
+            var catalogSettings = _settingService.LoadSetting<CatalogSettings>(storeScope);
+
+            catalogSettings.ProductSortingEnumDisplayOrder[model.Id] = model.DisplayOrder;
+            if (model.IsActive && catalogSettings.ProductSortingEnumDisabled.Contains(model.Id))
+                catalogSettings.ProductSortingEnumDisabled.Remove(model.Id);
+            if (!model.IsActive && !catalogSettings.ProductSortingEnumDisabled.Contains(model.Id))
+                catalogSettings.ProductSortingEnumDisabled.Add(model.Id);
+
+            _settingService.SaveSetting(catalogSettings, x => x.ProductSortingEnumDisabled, storeScope, false);
+            _settingService.SaveSetting(catalogSettings, x => x.ProductSortingEnumDisplayOrder, storeScope, false);
+            _settingService.ClearCache();
+
+            return new NullJsonResult();
+        }
+
+        #endregion
 
         public ActionResult RewardPoints()
         {
@@ -2403,6 +2461,8 @@ namespace Nop.Admin.Controllers
             model.SecuritySettings.CaptchaShowOnNewsCommentPage = captchaSettings.ShowOnNewsCommentPage;
             model.SecuritySettings.CaptchaShowOnProductReviewPage = captchaSettings.ShowOnProductReviewPage;
             model.SecuritySettings.CaptchaShowOnApplyVendorPage = captchaSettings.ShowOnApplyVendorPage;
+            model.SecuritySettings.ReCaptchaVersion = captchaSettings.ReCaptchaVersion;
+            model.SecuritySettings.AvailableReCaptchaVersions = ReCaptchaVersion.Version1.ToSelectList(false).ToList();
             model.SecuritySettings.ReCaptchaPublicKey = captchaSettings.ReCaptchaPublicKey;
             model.SecuritySettings.ReCaptchaPrivateKey = captchaSettings.ReCaptchaPrivateKey;
 
@@ -2642,6 +2702,7 @@ namespace Nop.Admin.Controllers
             captchaSettings.ShowOnNewsCommentPage = model.SecuritySettings.CaptchaShowOnNewsCommentPage;
             captchaSettings.ShowOnProductReviewPage = model.SecuritySettings.CaptchaShowOnProductReviewPage;
             captchaSettings.ShowOnApplyVendorPage = model.SecuritySettings.CaptchaShowOnApplyVendorPage;
+            captchaSettings.ReCaptchaVersion = model.SecuritySettings.ReCaptchaVersion;
             captchaSettings.ReCaptchaPublicKey = model.SecuritySettings.ReCaptchaPublicKey;
             captchaSettings.ReCaptchaPrivateKey = model.SecuritySettings.ReCaptchaPrivateKey;
             _settingService.SaveSetting(captchaSettings);

@@ -3,7 +3,7 @@
 --new locale resources
 declare @resources xml
 --a resource will be deleted if its value is empty
-set @resources='
+set @resources=' 
 <Language>
   <LocaleResource Name="Admin.Configuration.Settings.Forums.NotifyAboutPrivateMessages.Hint">
     <Value>Indicates whether a customer should be notified by email about new private messages.</Value>
@@ -68,6 +68,12 @@ set @resources='
   <LocaleResource Name="Admin.Configuration.Languages.Resources.View">
     <Value></Value>
   </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.ShowProductReviewsPerStore">
+    <Value>Reviews per store</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.ShowProductReviewsPerStore.Hint">
+    <Value>Enable show reviews per store.</Value>
+  </LocaleResource>
   <LocaleResource Name="Admin.Vendors.Fields.PageSizeOptions.ShouldHaveUniqueItems">
     <Value>Page Size options should have unique items.</Value>
   </LocaleResource>
@@ -76,6 +82,69 @@ set @resources='
   </LocaleResource>
   <LocaleResource Name="Admin.Catalog.Categories.Fields.PageSizeOptions.ShouldHaveUniqueItems">
     <Value>Page Size options should not have duplicate items.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.Productreviews.Fields.Store">
+	<Value>Store</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.ProductReviews.Fields.Store.Hint">
+	<Value>A store name in which this review was written.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.ProductReviews.List.SearchStore">
+	<Value>Store</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.ProductReviews.List.SearchStore.Hint">
+	<Value>Search by a specific store.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.SortOptions">
+    <Value>Sort options</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.SortOptions.DisplayOrder">
+    <Value>Display order</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.SortOptions.IsActive">
+    <Value>Is active</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.Catalog.SortOptions.Name">
+    <Value>Name</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.reCaptchaVersion">
+    <Value>reCAPTCHA version</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.GeneralCommon.reCaptchaVersion.Hint">
+    <Value>Select version of the reCAPTCHA.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Common.WrongCaptchaV2">
+    <Value>The reCAPTCHA response is invalid or malformed. Please try again.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Enums.Nop.Web.Framework.Security.Captcha.ReCaptchaVersion.Version1">
+    <Value>Version 1.0</Value>
+  </LocaleResource>
+  <LocaleResource Name="Enums.Nop.Web.Framework.Security.Captcha.ReCaptchaVersion.Version2">
+    <Value>Version 2.0</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.ProductReviews.List.SearchProduct">
+    <Value>Product</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.ProductReviews.List.SearchProduct.Hint">
+    <Value>Search by a specific product.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Catalog.Products.Imported">
+    <Value>Products have been imported successfully.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Languages.Fields.FlagImageFileName.Hint">
+    <Value>The flag image file name. The image should be saved into \images\flags\ directory.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.System.QueuedEmails.Fields.DontSendBeforeDate">
+    <Value>Planned date of sending</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.System.QueuedEmails.Fields.DontSendBeforeDate.Hint">
+    <Value>The specific send date and time.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.System.QueuedEmails.Fields.SendImmediately">
+    <Value>Send immediately</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.System.QueuedEmails.Fields.SendImmediately.Hint">
+    <Value>Send message immediately.</Value>
   </LocaleResource>
 </Language>
 '
@@ -169,6 +238,42 @@ GO
 ALTER TABLE [ProductAttributeValue] ALTER COLUMN [ImageSquaresPictureId] int NOT NULL
 GO
 
+--new column
+ IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id=object_id('[ProductReview]') and NAME='StoreId')
+ BEGIN
+ 	ALTER TABLE [dbo].[ProductReview] ADD
+ 	[StoreId] int NULL
+ END
+ GO
+ 
+ DECLARE @DefaultStoreId INT
+ SET @DefaultStoreId = (SELECT TOP (1) Id FROM [dbo].[Store]);
+ UPDATE [dbo].[ProductReview] SET StoreId = @DefaultStoreId WHERE StoreId IS NULL
+ GO
+ 
+ ALTER TABLE [dbo].[ProductReview] ALTER COLUMN [StoreId] INT NOT NULL
+ GO
+ 
+ IF EXISTS (SELECT 1 FROM   sys.objects WHERE  
+ 			name = 'ProductReview_Store'
+ 			AND parent_object_id = Object_id('ProductReview')
+ 			AND Objectproperty(object_id,N'IsForeignKey') = 1)
+ ALTER TABLE dbo.ProductReview
+ DROP CONSTRAINT ProductReview_Store
+ GO
+ 
+ ALTER TABLE [dbo].[ProductReview]  WITH CHECK ADD  CONSTRAINT [ProductReview_Store] FOREIGN KEY([StoreId])
+ REFERENCES [dbo].[Store] ([Id])
+ ON DELETE CASCADE
+ GO
+ 
+ --new setting
+ IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'catalogsettings.showproductreviewsperstore')
+ BEGIN
+ 	INSERT [Setting] ([Name], [Value], [StoreId])
+ 	VALUES (N'catalogsettings.showproductreviewsperstore', N'False', 0)
+ END
+ GO
 
 --new setting
 IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'mediasettings.imagesquarepicturesize')
@@ -219,5 +324,59 @@ IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'rewardpointssettings.pag
 BEGIN
 	INSERT [Setting] ([Name], [Value], [StoreId])
 	VALUES (N'rewardpointssettings.pagesize', N'10', 0)
+END
+GO
+
+--new setting
+IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'catalogsettings.productsortingenumdisabled')
+BEGIN
+	INSERT [Setting] ([Name], [Value], [StoreId]) 
+	VALUES (N'catalogsettings.productsortingenumdisabled',N'',0);
+END
+GO
+
+--new setting
+IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'catalogsettings.productsortingenumdisplayorder')
+BEGIN
+	INSERT [Setting] ([Name], [Value], [StoreId]) 
+	VALUES (N'catalogsettings.productsortingenumdisplayorder',N'',0);
+END
+GO
+
+--new setting
+IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'captchasettings.recaptchaversion')
+BEGIN
+	INSERT [Setting] ([Name], [Value], [StoreId]) 
+	VALUES (N'captchasettings.recaptchaversion',N'1',0);
+END
+GO
+
+--new or update setting
+IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'captchasettings.recaptchatheme')
+BEGIN
+	INSERT [Setting] ([Name], [Value], [StoreId]) 
+	VALUES (N'captchasettings.recaptchatheme',N'',0);
+END
+ELSE
+BEGIN
+	UPDATE [Setting] 
+	SET [Value] = N'' 
+	WHERE [Name] = N'captchasettings.recaptchatheme'
+END
+GO
+
+--new setting
+IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'captchasettings.recaptchalanguage')
+BEGIN
+	INSERT [Setting] ([Name], [Value], [StoreId]) 
+	VALUES (N'captchasettings.recaptchalanguage',N'',0);
+END
+GO
+
+--new column
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id=object_id('[QueuedEmail]') and NAME='DontSendBeforeDateUtc')
+BEGIN
+	ALTER TABLE [QueuedEmail]
+	ADD [DontSendBeforeDateUtc] DATETIME NULL
 END
 GO
